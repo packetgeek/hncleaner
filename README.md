@@ -11,3 +11,6 @@ Hacker News really doesn't care that some news sources are paywalls or that othe
     1) Edit the "news" script to add your own sites.
     2) Drop the "news" script in your /usr/bin/cgi-bin/ folder and point your browser at it.
 
+## Screenshot
+
+![screenshot](hncleaner.png)
