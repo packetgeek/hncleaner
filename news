@@ -1,0 +1,62 @@
+#!/usr/bin/perl
+
+#use strict;
+use LWP::UserAgent;
+use CGI;
+
+$query=new CGI;
+$p=$query->param('p');
+chomp $p;
+
+print "Content-type: text/html\n\n";
+
+my $ua = LWP::UserAgent->new;
+my $response;
+
+if($p eq "") {
+	$response = $ua->get("https://news.ycombinator.com/news");
+} else {
+	$response = $ua->get("https://news.ycombinator.com/news?p=$p");
+}
+
+if($response->is_success) {
+	#$response->content =~ /<H2><a [^>]*>([\n])([\d]+)<\/a>/;
+	#print $1 . "\n";
+	#print $2 . "\n";
+	#$response->content =~ s/<tr class='athing'/\n<tr class='athing'/g;
+	(@lines)=split("\n",$response->content);
+	foreach $line (@lines) {
+		chomp $line;
+		$line =~ s/\s+/ /g;
+		$output.=$line;
+	}
+	#$output=~ s/<tr class='athing'>.*?from\?site=medium.com".*?<\/tr> <tr class='athing'>/<tr class='athing'>/g;
+	(@newlines)=split(/<tr class='athing'> <td /,$output);
+	$counter=0;
+	foreach $newline (@newlines) {
+		 $newoutput[$counter++]="<tr class='athing'> <td valign=middle ".$newline."\n";
+	}
+
+	foreach $troll (@newoutput) {
+		if($troll =~ /from\?site=economist.com/) {
+			$troll=~ s/<td class="title">/<td class="title" style='background-color:yellow;'>/;	
+		}
+		if($troll =~ /from\?site=medium.com/) {
+			$troll=~ s/<td class="title">/<td class="title" style='background-color:yellow;'>/;	
+		}
+		if($troll =~ /from\?site=computerworld.com/) {
+			$troll=~ s/<td class="title">/<td class="title" style='background-color:yellow;'>/;	
+		}
+		if($troll =~ /from\?site=washingtonpost.com/) {
+			$troll=~ s/<td class="title">/<td class="title" style='background-color:yellow;'>/;	
+		}
+		$troll =~ s/<body>/<body vlink=#AAA>/;
+		$troll =~ s/<span class="rank">/<span class="rank" style='font-size:x-small;'>/;
+		$troll=~ s/<a href="http/&nbsp;&nbsp;<a style='text-decoration:none;font-size:large;' href="http/g;
+		#$troll=~ s/<td class="title"/<td class="title" style="font-size:large;"/;
+		$troll=~ s/<span class="sitebit comhead">/<span class="sitebit comhead" style='font-size:x-small;'>/;
+		print "</tr><tr><td><p></td><tr>".$troll;
+	}
+} else {
+	die $response->status_line;
+}
